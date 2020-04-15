@@ -1,5 +1,8 @@
 __pycache__/
 
+prikey.txt
+pubkey.txt
+
 #IntelliJ Project Files
 .idea/
 *.iml

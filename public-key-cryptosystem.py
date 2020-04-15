@@ -100,22 +100,29 @@ def keygen():
     g = 2
 
     # find prime 'p'
-    while True:
-        while True:
-            q = secrets.randbits(31)
-            print(q)
-            if miller_rabin(q, 5) and q % 12 == 5:
-                break
-        p = (2 * q) + 1
-        if miller_rabin(p, 5):
-            break
-    print("prime:", p)
+    # while True:
+    #     while True:
+    #         q = secrets.randbits(31)
+    #         print(q)
+    #         if miller_rabin(q, 5) and q % 12 == 5:
+    #             break
+    #     p = (2 * q) + 1
+    #     if miller_rabin(p, 5):
+    #         break
+    # print("prime:", p)
+    p = 101
 
     # pick a random secret key 'd'
     d = secrets.randbelow(p)
 
     # calculate public key 'e2'
     e2 = fast_exponent_mod(g, d, p)
+
+    with open('pubkey.txt', 'w') as file:
+        file.write(str(p) + ' ' + str(g) + ' ' + str(e2))
+
+    with open('prikey.txt', 'w') as file:
+        file.write(str(p) + ' ' + str(g) + ' ' + str(d))
 
     return (p, g, e2), (p, g, d)
 
