@@ -1,3 +1,5 @@
+import secrets
+
 def fast_exponent_mod(base, exponent, modulus):
     """
     An efficient implementation of fast exponentiation modulo n.
@@ -94,7 +96,6 @@ def keygen():
 
     :return: The public and private keys, each as a 3-part tuple containing the prime, generator, and key.
     """
-    import secrets
 
     # use '2' as generator 'g'
     g = 2
@@ -128,11 +129,47 @@ def keygen():
 
 
 def encrypt(key_file, text_file):
-    pass
+    # read in public key from key_file
+    with open(key_file, 'r') as file:
+        key = file.read().split(' ')
+        p = int(key[0])
+        g = int(key[1])
+        e2 = int(key[2])
+
+    with open(text_file) as message_file:
+        with open('ctext.txt', 'w') as cipher_file:
+            while True:
+                m, eof = getblock(message_file)
+                k = secrets.randbelow(p)
+                c1 = fast_exponent_mod(g, k, p)
+                c2 = (fast_exponent_mod(e2, k, p) * (m % p) % p)
+                print("C1:", c1)
+                print("C2:", c2)
+                cipher_file.write(str(c1) + ' ' + str(c2))
+
+                if eof:
+                    break
+
+
+def getblock(file):
+    eof = False
+    block = 0
+    for i in range(4):
+        char = file.read(1)
+        if char == '':
+            char = '0'
+            eof = True
+        block = (block << 8) ^ ord(char)
+    return block, eof
 
 
 def decrypt(key_file, cipher_file):
-    pass
+    # read in private key from key_file
+    with open(key_file, 'r') as file:
+        key = file.read().split(' ')
+        p = int(key[0])
+        g = int(key[1])
+        d = int(key[2])
 
 
 if __name__ == '__main__':
