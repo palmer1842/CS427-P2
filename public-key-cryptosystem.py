@@ -1,5 +1,6 @@
 import secrets
 
+
 def fast_exponent_mod(base, exponent, modulus):
     """
     An efficient implementation of fast exponentiation modulo n.
@@ -105,8 +106,9 @@ def keygen():
         while True:
             # !!! adjusted for 8 bit message block !!!
             q = secrets.randbits(8)
-            # q = q | 2147483648  # ensure that 32nd bit is high
-            q = q | 128
+            q = q | 129  # ensure that 8th bit is high and the number is odd
+            # q = secrets.randbits(32)
+            # q = q | 2147483649  # ensure that 32nd bit is high and the number is odd
             if miller_rabin(q, 5) and q % 12 == 5:
                 break
         p = (2 * q) + 1
@@ -129,6 +131,14 @@ def keygen():
 
 
 def encrypt(key_file, text_file):
+    """
+    Encrypts an ASCII text file using a public key generated from keygen()
+    The resulting cipher text is written to a file called 'ctext.txt'
+
+    :param key_file: A text file containing the public key in the form 'p g e2'
+    :param text_file: An ASCII text file containing a plaintext message to encrypt
+    :return: Nothing
+    """
     # read in public key from key_file
     with open(key_file, 'r') as file:
         key = file.read().split(' ')
@@ -152,6 +162,13 @@ def encrypt(key_file, text_file):
 
 
 def getblock(file):
+    """
+    A helper method for encrypt()
+    Reads a 32 bit block from a given ASCII text file
+
+    :param file: The file to read
+    :return: A 32 bit integer block, and EOF status
+    """
     eof = False
     block = 0
 
@@ -166,6 +183,16 @@ def getblock(file):
 
 
 def decrypt(key_file, cipher_file):
+    """
+    Decrypts a cipher text file created with encrypt(), using a private key generated with keygen()
+    The file is assumed to be an ASCII text file containing a series of integers separated by spaces
+
+    The resulting plaintext is written to a file called 'dtext.txt'
+
+    :param key_file: A text file containing the public key in the form 'p g d'
+    :param cipher_file: An ASCII text file containing the cipher text to decrypt
+    :return: Nothing
+    """
     # read in private key from key_file
     with open(key_file, 'r') as file:
         key = file.read().split(' ')
@@ -181,14 +208,22 @@ def decrypt(key_file, cipher_file):
                 if eof:
                     break
                 m = (fast_exponent_mod(c1, p - 1 - d, p) * (c2 % p)) % p
-                print("Message block: " + str(m) + '->' + chr(m))
+                print("Message block: " + str(m) + ' -> ' + chr(m))
                 decryption_file.write(chr(m))
 
 
 def readint(file):
+    """
+    A helper method for decrypt()
+    Reads and converts a single integer from the input file
+
+    :param file: The file to read
+    :return: A single integer and EOF status
+    """
     eof = False
     num = ''
     while True:
+        # build the number one character at a time
         nextnum = file.read(1)
         if nextnum == ' ':
             break
