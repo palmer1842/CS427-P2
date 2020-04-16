@@ -101,17 +101,17 @@ def keygen():
     g = 2
 
     # find prime 'p'
-    # while True:
-    #     while True:
-    #         q = secrets.randbits(31)
-    #         print(q)
-    #         if miller_rabin(q, 5) and q % 12 == 5:
-    #             break
-    #     p = (2 * q) + 1
-    #     if miller_rabin(p, 5):
-    #         break
-    # print("prime:", p)
-    p = 101
+    while True:
+        while True:
+            # !!! adjusted for 8 bit message block !!!
+            q = secrets.randbits(8)
+            # q = q | 2147483648  # ensure that 32nd bit is high
+            q = q | 128
+            if miller_rabin(q, 5) and q % 12 == 5:
+                break
+        p = (2 * q) + 1
+        if miller_rabin(p, 5):
+            break
 
     # pick a random secret key 'd'
     d = secrets.randbelow(p)
@@ -136,16 +136,16 @@ def encrypt(key_file, text_file):
         g = int(key[1])
         e2 = int(key[2])
 
-    with open(text_file) as message_file:
+    with open(text_file, 'r') as message_file:
         with open('ctext.txt', 'w') as cipher_file:
             while True:
                 m, eof = getblock(message_file)
                 k = secrets.randbelow(p)
                 c1 = fast_exponent_mod(g, k, p)
-                c2 = (fast_exponent_mod(e2, k, p) * (m % p) % p)
+                c2 = (fast_exponent_mod(e2, k, p) * (m % p)) % p
                 print("C1:", c1)
                 print("C2:", c2)
-                cipher_file.write(str(c1) + ' ' + str(c2))
+                cipher_file.write(str(c1) + ' ' + str(c2) + ' ')
 
                 if eof:
                     break
@@ -154,7 +154,9 @@ def encrypt(key_file, text_file):
 def getblock(file):
     eof = False
     block = 0
-    for i in range(4):
+
+    # !!! adjusted for 8 bit message block !!!
+    for i in range(1):
         char = file.read(1)
         if char == '':
             char = '0'
@@ -168,8 +170,34 @@ def decrypt(key_file, cipher_file):
     with open(key_file, 'r') as file:
         key = file.read().split(' ')
         p = int(key[0])
-        g = int(key[1])
+        g = int(key[1])  # the generator isn't actually needed for decryption
         d = int(key[2])
+
+    with open(cipher_file, 'r') as cipher_file:
+        with open('dtext.txt', 'w') as decryption_file:
+            while True:
+                c1, eof = readint(cipher_file)
+                c2, eof = readint(cipher_file)
+                if eof:
+                    break
+                m = (fast_exponent_mod(c1, p - 1 - d, p) * (c2 % p)) % p
+                print("Message block: " + str(m) + '->' + chr(m))
+                decryption_file.write(chr(m))
+
+
+def readint(file):
+    eof = False
+    num = ''
+    while True:
+        nextnum = file.read(1)
+        if nextnum == ' ':
+            break
+        if nextnum == '':
+            num = 0
+            eof = True
+            break
+        num += nextnum
+    return int(num), eof
 
 
 if __name__ == '__main__':
