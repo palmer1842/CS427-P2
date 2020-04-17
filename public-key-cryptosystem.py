@@ -1,4 +1,4 @@
-import secrets
+import random
 
 
 def fast_exponent_mod(base, exponent, modulus):
@@ -101,14 +101,18 @@ def keygen():
     # use '2' as generator 'g'
     g = 2
 
+    # prompt for a seed
+    seed = input("Enter a seed for the generator: ")
+    random.seed(seed)
+
     # find prime 'p'
     while True:
         while True:
             # !!! adjusted for 8 bit message block !!!
-            q = secrets.randbits(8)
-            q = q | 129  # ensure that 8th bit is high and the number is odd
-            # q = secrets.randbits(32)
-            # q = q | 2147483649  # ensure that 32nd bit is high and the number is odd
+            # q = random.getrandbits(8)
+            # q = q | 129  # ensure that 8th bit is high and the number is odd
+            q = random.getrandbits(32)
+            q = q | 2147483649  # ensure that 32nd bit is high and the number is odd
             if miller_rabin(q, 5) and q % 12 == 5:
                 break
         p = (2 * q) + 1
@@ -116,7 +120,7 @@ def keygen():
             break
 
     # pick a random secret key 'd'
-    d = secrets.randbelow(p)
+    d = random.randrange(p)
 
     # calculate public key 'e2'
     e2 = fast_exponent_mod(g, d, p)
@@ -150,7 +154,7 @@ def encrypt(key_file, text_file):
         with open('ctext.txt', 'w') as cipher_file:
             while True:
                 m, eof = getblock(message_file)
-                k = secrets.randbelow(p)
+                k = random.randrange(p)
                 c1 = fast_exponent_mod(g, k, p)
                 c2 = (fast_exponent_mod(e2, k, p) * (m % p)) % p
                 print("C1:", c1)
