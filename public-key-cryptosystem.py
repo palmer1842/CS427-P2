@@ -104,11 +104,8 @@ def keygen():
     # find prime 'p'
     while True:
         while True:
-            # !!! adjusted for 8 bit message block !!!
-            q = secrets.randbits(8)
-            q = q | 129  # ensure that 8th bit is high and the number is odd
-            # q = secrets.randbits(32)
-            # q = q | 2147483649  # ensure that 32nd bit is high and the number is odd
+            q = secrets.randbits(32)
+            q = q | 2147483649  # ensure that 32nd bit is high and the number is odd
             if miller_rabin(q, 5) and q % 12 == 5:
                 break
         p = (2 * q) + 1
@@ -172,8 +169,7 @@ def getblock(file):
     eof = False
     block = 0
 
-    # !!! adjusted for 8 bit message block !!!
-    for i in range(1):
+    for i in range(4):
         char = file.read(1)
         if char == '':
             char = '0'
@@ -208,8 +204,13 @@ def decrypt(key_file, cipher_file):
                 if eof:
                     break
                 m = (fast_exponent_mod(c1, p - 1 - d, p) * (c2 % p)) % p
-                print("Message block: " + str(m) + ' -> ' + chr(m))
-                decryption_file.write(chr(m))
+                # convert integer message block to ASCII characters
+                m1 = (m >> 24) & 0xFF
+                m2 = (m >> 16) & 0xFF
+                m3 = (m >> 8) & 0xFF
+                m4 = m & 0xFF
+                print("Message block: " + str(m) + ' -> ' + chr(m1) + chr(m2) + chr(m3) + chr(m4))
+                decryption_file.write(chr(m1) + chr(m2) + chr(m3) + chr(m4))
 
 
 def readint(file):
