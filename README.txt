@@ -15,6 +15,10 @@ Project Overview:
   The prime 'p' is calculated in such a way that it's generator is always 2. The Miller-Rabin algorithm is used to
   check prime candidates.
 
+  I originally used my Miller-Rabin implementation from homework 4, but it was too inefficient to generate a 33 bit
+  prime in a reasonable amount of time. I made some optimizations, and switched the Witness method from the one we
+  discussed in class to the one from Wikipedia's article: Miller–Rabin primality test.
+
   Using a public key, the user can encrypt an ASCII text file. The file is encrypted in 32 bit 'blocks', with each block
   becoming a pair of integers. The program will output a cipher text file called 'ctext.txt', which will contain the
   integer pairs.

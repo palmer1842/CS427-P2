@@ -42,49 +42,42 @@ def miller_rabin(n, s):
     """
     import random
 
-    # input check to avoid edge cases we can't handle
-    # shouldn't ever be needed when used with the main method
-    if n < 4:
-        return False
+    # generate t and u such that t >= 1, u is odd, and (n-1 = 2^t * u)
+    # this is done by factoring n - 1 by powers of two, using some tricks with binary
+    u = n - 1
+    t = 0
+    while (u & 0b1) != 1:
+        u //= 2
+        t += 1
 
     for i in range(0, s):
         a = random.randrange(2, n - 1)
-        if witness(a, n):
+        if witness(a, n, t, u):
             return False
     return True
 
 
-def witness(a, n):
+def witness(a, n, t, u):
     """
     Part of the Miller-Rabin algorithm for primality testing.
 
-    This implementation comes from Introduction to Algorithms by Cormen, Leiserson, Rivest, Stein, as referenced in
-    Professor Kabir's lecture notes.
+    This implementation comes the Wikipedia Article "Miller–Rabin primality test"
 
     :param a: Integer - The witness to test with, 1 < a < n-1
     :param n: Integer - The number to test for primality
+    :param u: Integer - A pre-calculated value used in the algorithm
+    :param t: Integer - A pre-calculated value used in the algorithm
     :return: Boolean - True if composite, False if prime
     """
 
-    # input check to avoid edge cases we can't handle
-    # shouldn't ever be needed when used with the main method
-    if n < 4:
-        return False
-
-    # generate t and u such that t >= 1, u is odd, and (n-1 = 2^t * u)
-    # this is done by factoring n - 1 by powers of two, using some tricks with binary
-    binary = format(n - 1, 'b')  # get a binary representation of n - 1
-    t = len(binary) - len(binary.rstrip('0'))  # t is the number of trailing zeros
-    u = int(binary.rstrip('0'), 2)  # u is the binary number that results from removing the trailing zeros
-
-    x = [fast_exponent_mod(a, u, n)]
-
-    for i in range(1, t + 1):
-        x.append((x[i - 1] * x[i - 1]) % n)
-        if x[i] is 1 and x[i - 1] is not 1 and x[i - 1] is not n - 1:
-            return True
-    if x[t] is not 1:
+    # Wikipedia's Algorithm:
+    x = fast_exponent_mod(a, u, n)
+    if x == 1 or x == (n - 1):
         return True
+    for i in range(0, t - 1):
+        x = fast_exponent_mod(x, 2, n)
+        if x == n - 1:
+            return True
     return False
 
 
@@ -106,10 +99,10 @@ def keygen():
         while True:
             q = secrets.randbits(32)
             q = q | 2147483649  # ensure that 32nd bit is high and the number is odd
-            if miller_rabin(q, 5) and q % 12 == 5:
+            if miller_rabin(q, 100) and q % 12 == 5:
                 break
         p = (2 * q) + 1
-        if miller_rabin(p, 5):
+        if miller_rabin(p, 100):
             break
 
     # pick a random secret key 'd'
