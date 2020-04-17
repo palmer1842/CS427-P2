@@ -239,23 +239,30 @@ def readint(file):
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(usage='public-key-cryptosystem.py [-h] ("keygen" | keyfile textfile) [-e | -d]')
     parser.add_argument('key_file')
-    parser.add_argument('message_file')
+    parser.add_argument('text_file', nargs='?')
     parser.add_argument('-e', action='store_true')
     parser.add_argument('-d', action='store_true')
     parser.add_argument('-p', action='store_true')
 
     args = parser.parse_args()
 
-    if args.e:
-        encrypt(args.key_file, args.message_file)
-    elif args.d:
-        decrypt(args.key_file, args.message_file)
-    else:
+    if args.key_file == 'keygen':
         keys = keygen()
-        if args.p:
-            print("Public Key: ", keys[0])
-            print("Private Key:", keys[1])
-
-    pass
+        print("Public Key: ", keys[0])
+        print("Private Key:", keys[1])
+    elif args.e:
+        if not args.text_file:
+            parser.print_usage()
+            print("Error: No text file given to encrypt")
+            exit(1)
+        encrypt(args.key_file, args.text_file)
+    elif args.d:
+        if not args.text_file:
+            parser.print_usage()
+            print("Error: No text file given to decrypt")
+            exit(1)
+        decrypt(args.key_file, args.text_file)
+    else:
+        parser.print_usage()

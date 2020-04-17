@@ -29,7 +29,7 @@ Included Files:
 Running:
   The program can be run with python 3.
 
-    python3 public-key-cryptosystem.py (keygen | keyfile textfile) [-e | -d]
+    python3 public-key-cryptosystem.py [-h] ("keygen" | keyfile textfile) [-e | -d]
 
   Running with the single argument 'keygen' will generate a public and private key pair, and store them in 'pubkey.txt'
   and 'prikey.txt'.
