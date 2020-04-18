@@ -143,8 +143,7 @@ def encrypt(key_file, text_file):
                 k = secrets.randbelow(p)
                 c1 = fast_exponent_mod(g, k, p)
                 c2 = (fast_exponent_mod(e2, k, p) * (m % p)) % p
-                print("C1:", c1)
-                print("C2:", c2)
+                print("C1 C2:", c1, c2)
                 cipher_file.write(str(c1) + ' ' + str(c2) + ' ')
 
                 if eof:
