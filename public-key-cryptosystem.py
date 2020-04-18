@@ -73,12 +73,12 @@ def witness(a, n, t, u):
     # Wikipedia's Algorithm:
     x = fast_exponent_mod(a, u, n)
     if x == 1 or x == (n - 1):
-        return True
+        return False
     for i in range(0, t - 1):
         x = fast_exponent_mod(x, 2, n)
         if x == n - 1:
-            return True
-    return False
+            return False
+    return True
 
 
 def keygen():

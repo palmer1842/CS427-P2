@@ -26,6 +26,9 @@ Project Overview:
   Using the corresponding private key, a cipher text can be decrypted. The decrypted message will be
   output into a file called 'dtext.txt'.
 
+  Because the file is encrypted in 32 bit, or 4 character, blocks, the decrypted message will contain some zeros as
+  padding.
+
 Included Files:
   public-key-cryptosystem.py --- The program, containing key gen, encryption, decryption, and helper methods
   README.txt -- documentation
